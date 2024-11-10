@@ -111,29 +111,29 @@ jobs:
       - name: Run Tests
         run: npm test
 
-  # deploy:
-  #   #--------------------------------------------------------------------------
-  #   #
-  #   # By default, jobs run in parallel, while steps run sequentially.
-  #   # Thus you really don't want the deploy job to run as a
-  #   # parallel job to the testing job. You could fix this by making
-  #   # the deploy a step. Conversely, you could use the 'needs' keyword.
-  #   #
-  #   # Here I only truly need build, but also dont' want this
-  #   # to deploy unless lint and test are successful.
-  #   #
-  #   #--------------------------------------------------------------------------
-  #   needs: [build, lint, test]
-  #   name: Deploy
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Deploy to AWS
-  #       # https://github.com/actions/download-artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: dist # Corresponds to the upload name
-  #     - name: Verify dist artifact contents
-  #       run: ls
+  deploy:
+    #--------------------------------------------------------------------------
+    #
+    # By default, jobs run in parallel, while steps run sequentially.
+    # Thus you really don't want the deploy job to run as a
+    # parallel job to the testing job. You could fix this by making
+    # the deploy a step. Conversely, you could use the 'needs' keyword.
+    #
+    # Here I only truly need build, but also dont' want this
+    # to deploy unless lint and test are successful.
+    #
+    #--------------------------------------------------------------------------
+    needs: [build, lint, test]
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to AWS
+        # https://github.com/actions/download-artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist # Corresponds to the upload name
+      - name: Verify dist artifact contents
+        run: ls
 
   # bonus:
   #   needs: deploy

@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "dev": "nodemon",
     "prebuild": "(rimraf dist || rm -rf dist) && (rimraf upload.zip || rm -rf upload.zip)",
-    "build": "CREATE_ZIP=true node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs",
     "check-ts": "tsc --noEmit --watch",
     "test": "vitest",
     "test:ui": "vitest --ui",

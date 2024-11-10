@@ -145,8 +145,8 @@ await esbuild.build({
 /* ======================
 
 ====================== */
-// This assumes your build script does this:
-// "build": "CREATE_UPLOAD_ZIP=true node esbuild.config.mjs",
+// This assumes that you do something like thie:
+// CREATE_ZIP=true npm run build
 
 const shouldCreateZip = process.env.CREATE_ZIP === 'true'
 

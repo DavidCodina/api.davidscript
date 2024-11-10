@@ -21,6 +21,12 @@ on:
   # trigger automatially on the first time.
   #
   #--------------------------------------------------------------------------
+
+  # push:
+  #   branches:
+  #     - main
+  #     - master
+
   pull_request:
     branches:
       - main
@@ -135,11 +141,11 @@ jobs:
       - name: Verify dist artifact contents
         run: ls
 
-  # bonus:
-  #   needs: deploy
-  #   name: Bonus
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     # https://docs.github.com/en/actions/learn-github-actions/contexts
-  #     - name: Bonus -  output context of github
-  #       run: echo "${{ toJSON(github) }}"
+  bonus:
+    needs: deploy
+    name: Bonus
+    runs-on: ubuntu-latest
+    steps:
+      # https://docs.github.com/en/actions/learn-github-actions/contexts
+      - name: Bonus -  output context of github
+        run: echo "${{ toJSON(github) }}"

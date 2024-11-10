@@ -1,0 +1,25 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+dist 
+node_modules
+.DS_Store
+logs
+upload.zip
+
+# misc
+.DS_Store
+.env
+.env.development
+.env.development.local
+.env.production
+.env.production.local
+.env.local
+.env.test.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+

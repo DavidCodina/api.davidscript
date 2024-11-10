@@ -62,32 +62,32 @@ jobs:
           name: dist # dist-files
           path: dist
 
-  # lint: # The name of job is arbitrary.
-  #   # The actual name used here is important because it allows us to search for
-  #   # the correct status check when Requiring status checks to pass before merging.
-  #   # This is set up in GitHub branch --> Settings --> Branches.
-  #   name: Lint
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [22.x]
-  #   steps:
-  #     # https://github.com/marketplace/actions/checkout
-  #     # https://github.com/actions/checkout
-  #     - uses: actions/checkout@v4
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - name: Cache Dependencies
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ~/.npm
-  #         key: node_modules-${{ hashFiles('**/package-lock.json') }}
-  #     - name: Install Dependencies
-  #       run: npm ci
-  #     - name: Lint src
-  #       run: npm run lint
+  lint: # The name of job is arbitrary.
+    # The actual name used here is important because it allows us to search for
+    # the correct status check when Requiring status checks to pass before merging.
+    # This is set up in GitHub branch --> Settings --> Branches.
+    name: Lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      # https://github.com/marketplace/actions/checkout
+      # https://github.com/actions/checkout
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Lint src
+        run: npm run lint
 
   # test:
   #   name: Test

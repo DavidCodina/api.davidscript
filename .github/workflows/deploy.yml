@@ -1,18 +1,145 @@
+# The name of this file can be anyting but needs to be .yml
+name: Build, Lint, Test, Deploy
 
-name: Deploy to AWS
+## Review video 124 **
+# Whenever someone pushes to branch main then run the following job.
+on:
+  # https://docs.github.com/en/actions/using-workflows
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
 
-# on: 
-#   push: 
-#     branches: 
-#       - main
-
-on: workflow_dispatch
-
+  #--------------------------------------------------------------------------
+  #
+  # Note:
+  #
+  # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34138630#overview
+  # Pull Request from contributors that forked will not occur automatically, but instead require approval.
+  # Why? Because obviously you don't want to automatically deploy from forked users.
+  # By default, pull requests based on forks do not trigger workflows.
+  # First-time contributors must be approved manually. Subsequent PRs will be triggered
+  # automatically. That said, if you add a collaborator and they do a first PR, it will
+  # trigger automatially on the first time.
+  #
+  #--------------------------------------------------------------------------
+  pull_request:
+    branches:
+      - main
+      - master
+      # - development # 'dev*'
+      # - dev
+  workflow_dispatch:
 jobs:
-  workflow-test: # Arbitrary name
+  build:
+    name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
     steps:
-      # - uses: actions/checkout@v4
-      
-      - name: Run a script that echoes a test string
-        run: echo "Testing 123..."
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      # Cache dependencies. Must be done in all jobs that install dependencies.
+      # This seems to speed up the process by about 20s.
+      # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139976#overview
+      - name: Cache Dependencies
+        # https://github.com/actions/cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Project
+        run: npm run build
+        # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139932#overview
+      - name: Upload artifacts
+        # https://github.com/actions/upload-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist # dist-files
+          path: dist
+
+  # lint: # The name of job is arbitrary.
+  #   # The actual name used here is important because it allows us to search for
+  #   # the correct status check when Requiring status checks to pass before merging.
+  #   # This is set up in GitHub branch --> Settings --> Branches.
+  #   name: Lint
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node-version: [22.x]
+  #   steps:
+  #     # https://github.com/marketplace/actions/checkout
+  #     # https://github.com/actions/checkout
+  #     - uses: actions/checkout@v4
+  #     - name: Use Node.js ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ matrix.node-version }}
+  #     - name: Cache Dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.npm
+  #         key: node_modules-${{ hashFiles('**/package-lock.json') }}
+  #     - name: Install Dependencies
+  #       run: npm ci
+  #     - name: Lint src
+  #       run: npm run lint
+
+  # test:
+  #   name: Test
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node-version: [18.x]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Use Node.js ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ matrix.node-version }}
+  #     - name: Cache Dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.npm
+  #         key: node_modules-${{ hashFiles('**/package-lock.json') }}
+  #     - name: Install Dependencies
+  #       run: npm ci
+  #     - name: Run Tests
+  #       run: npm test
+
+  # deploy:
+  #   #--------------------------------------------------------------------------
+  #   #
+  #   # By default, jobs run in parallel, while steps run sequentially.
+  #   # Thus you really don't want the deploy job to run as a
+  #   # parallel job to the testing job. You could fix this by making
+  #   # the deploy a step. Conversely, you could use the 'needs' keyword.
+  #   #
+  #   # Here I only truly need build, but also dont' want this
+  #   # to deploy unless lint and test are successful.
+  #   #
+  #   #--------------------------------------------------------------------------
+  #   needs: [build, lint, test]
+  #   name: Deploy
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Deploy to AWS
+  #       # https://github.com/actions/download-artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: dist # Corresponds to the upload name
+  #     - name: Verify dist artifact contents
+  #       run: ls
+
+  # bonus:
+  #   needs: deploy
+  #   name: Bonus
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # https://docs.github.com/en/actions/learn-github-actions/contexts
+  #     - name: Bonus -  output context of github
+  #       run: echo "${{ toJSON(github) }}"

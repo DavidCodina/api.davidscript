@@ -30,9 +30,15 @@ jobs:
     name: Check Conclusion
     runs-on: ubuntu-latest
     steps:
-      - name: Log Event Conclusion
-        run: echo "Event conclusion: ${{ github.event.workflow_run.conclusion }}"
-        shell: bash
+      - name: Log Event Payload
+        run: |
+          echo "Event payload:"
+          echo "${{ toJSON(github.event) }}"
+
+      - name: Extract and Log Conclusion
+        run: |
+          conclusion=${{ github.event.workflow_run.conclusion }}
+          echo "Event conclusion: $conclusion"
 
   should-deploy:
     runs-on: ubuntu-latest

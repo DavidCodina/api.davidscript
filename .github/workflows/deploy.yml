@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Log Event Conclusion
-        run: echo "Event conclusion: ${{ github.event.workflow_run.conclusion }}"
+        run: 'Event conclusion: ${{ github.event.workflow_run.conclusion }}'
 
   should-deploy:
     runs-on: ubuntu-latest

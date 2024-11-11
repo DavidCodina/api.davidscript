@@ -2,6 +2,9 @@ name: Deploy
 
 on:
   push:
+    # If test.yml runs when a pull_request happens in main or master.
+    # In such cases, it may result in a push event into main or master,
+    # which will then trigger this workflow.
     branches:
       - main
       - master
@@ -14,6 +17,10 @@ on:
       - main
       - master
 
+  # Manually running the workflow will necessarily result in an error such that:
+  # Unable to download artifact(s): Artifact not found for name: dist
+  # However, we set continue-on-error: true, and if the dist folder isn't found from
+  # downloading the artificat, then we build it.
   workflow_dispatch:
 
 jobs:
@@ -47,9 +54,6 @@ jobs:
           name: dist
           path: dist
 
-      # - name: Verify dist artifact contents
-      #   run: ls
-
       # Check if dist folder exists and has contents
       - name: Check dist folder
         id: check-dist
@@ -72,6 +76,9 @@ jobs:
       - name: Build Project
         if: steps.check-dist.outputs.dist_exists != 'true'
         run: npm run build
+
+      # - name: Verify dist artifact contents
+      #   run: ls
 
       - name: Create Deployment Package
         # Assumes a package.json script of:

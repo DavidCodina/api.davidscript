@@ -145,8 +145,17 @@ await esbuild.build({
 /* ======================
 
 ====================== */
-// This assumes that you do something like thie:
-// CREATE_ZIP=true npm run build
+///////////////////////////////////////////////////////////////////////////
+//
+// This assumes that you do something like this:
+//
+//   CREATE_ZIP=true npm run build
+//
+// However, it's still easier to just use something like beszip:
+// "zip": "bestzip upload.zip dist/* package.json", which seems like
+// it also does a better job of compressing the files.
+//
+///////////////////////////////////////////////////////////////////////////
 
 const shouldCreateZip = process.env.CREATE_ZIP === 'true'
 

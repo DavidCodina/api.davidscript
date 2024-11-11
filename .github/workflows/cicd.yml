@@ -34,6 +34,12 @@ on:
       # - development # 'dev*'
       # - dev
   workflow_dispatch:
+
+env:
+  NODE_ENV: development
+  PORT: 5000
+  # MONGO_URI: mongodb://localhost:27017/demo
+
 jobs:
   build:
     name: Build
@@ -61,11 +67,11 @@ jobs:
       - name: Build Project
         run: npm run build
         # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139932#overview
-      - name: Upload artifacts
+      - name: Upload Artifacts
         # https://github.com/actions/upload-artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dist # dist-files
+          name: dist
           path: dist
 
   lint: # The name of job is arbitrary.
@@ -117,29 +123,62 @@ jobs:
       - name: Run Tests
         run: npm test
 
+  #--------------------------------------------------------------------------
+  #
+  # By default, jobs run in parallel, while steps run sequentially.
+  # Thus you really don't want the deploy job to run as a
+  # parallel job to the testing job. You could fix this by making
+  # the deploy a step. Conversely, you could use the 'needs' keyword.
+  #
+  # Here I only truly need build, but also dont' want this
+  # to deploy unless lint and test are successful.
+  #
+  #--------------------------------------------------------------------------
+
   deploy:
-    #--------------------------------------------------------------------------
-    #
-    # By default, jobs run in parallel, while steps run sequentially.
-    # Thus you really don't want the deploy job to run as a
-    # parallel job to the testing job. You could fix this by making
-    # the deploy a step. Conversely, you could use the 'needs' keyword.
-    #
-    # Here I only truly need build, but also dont' want this
-    # to deploy unless lint and test are successful.
-    #
-    #--------------------------------------------------------------------------
     needs: [build, lint, test]
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to AWS
+      - name: Download Artifacts
         # https://github.com/actions/download-artifact
         uses: actions/download-artifact@v4
         with:
-          name: dist # Corresponds to the upload name
-      - name: Verify dist artifact contents
-        run: ls
+          name: dist
+          path: .
+
+      # - name: Verify dist artifact contents
+      #   run: ls
+
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Create Deployment Package
+        # Assumes a package.json script of:
+        # "zip": "bestzip upload.zip dist/* package.json",
+        run: npm run zip
+
+      - name: Configure AWS credentials
+        # https://github.com/aws-actions/configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # The aws-cli comes pre-installed on GitHub Actions' Ubuntu runners, including ubuntu-latest. This means you don't
+      # need to install any additional tools for the aws lambda command to work in your GitHub workflow.
+      - name: Deploy to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name davidscript-server \
+            --zip-file fileb://upload.zip
 
   bonus:
     needs: deploy
@@ -147,5 +186,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # https://docs.github.com/en/actions/learn-github-actions/contexts
-      - name: Bonus -  output context of github
+      - name: Bonus - output context of github
         run: echo "${{ toJSON(github) }}"

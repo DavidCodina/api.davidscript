@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
       secret: process.env.SECRET || '???',
       NODE_ENV: process.env.NODE_ENV || '???'
     },
-    message: `You accessed the '/' route (CICD Test 5).`,
+    message: `You accessed the '/' route (CICD Test 6).`,
     success: true
   })
 })

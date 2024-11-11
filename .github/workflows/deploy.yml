@@ -1,0 +1,86 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      # Attempt to download the artifact
+      - name: Download Build Artifacts
+        id: download-artifact
+        continue-on-error: true # Allow the workflow to continue if this fails
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      # - name: Verify dist artifact contents
+      #   run: ls
+
+      # Check if dist folder exists and has contents
+      - name: Check dist folder
+        id: check-dist
+        run: |
+          if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
+            echo "dist_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "dist_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        if: steps.check-dist.outputs.dist_exists != 'true'
+        run: npm run build
+
+      - name: Create Deployment Package
+        # Assumes a package.json script of:
+        # "zip": "bestzip upload.zip dist/* package.json",
+        run: npm run zip
+
+      - name: Configure AWS credentials
+        # https://github.com/aws-actions/configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # The aws-cli comes pre-installed on GitHub Actions' Ubuntu runners, including ubuntu-latest. This means you don't
+      # need to install any additional tools for the aws lambda command to work in your GitHub workflow.
+      - name: Deploy to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name davidscript-server \
+            --zip-file fileb://upload.zip
+
+  # bonus:
+  #   needs: deploy
+  #   name: Bonus
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # https://docs.github.com/en/actions/learn-github-actions/contexts
+  #     - name: Bonus - output context of github
+  #       run: echo "${{ toJSON(github) }}"

@@ -2,8 +2,10 @@ name: Deploy
 
 on:
   push:
-    # If test.yml runs when a pull_request happens in main or master.
-    # In such cases, it may result in a push event into main or master,
+    # test.yml runs when a pull_request happens in main or master.
+    # In such cases, IF the pull request is then merged,
+
+    # it may result in a push event into main or master,
     # which will then trigger this workflow.
     branches:
       - main
@@ -24,6 +26,13 @@ on:
   workflow_dispatch:
 
 jobs:
+  check-conclusion:
+    name: Check Conclusion
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Event Conclusion
+        run: echo "Event conclusion: ${{ github.event.workflow_run.conclusion }}"
+
   should-deploy:
     runs-on: ubuntu-latest
     # || github.event_name == 'push'

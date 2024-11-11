@@ -22,17 +22,17 @@ on:
   #
   #--------------------------------------------------------------------------
 
-  # push:
-  #   branches:
-  #     - main
-  #     - master
-
-  pull_request:
+  push:
     branches:
       - main
       - master
-      # - development # 'dev*'
-      # - dev
+
+  # pull_request:
+  #   branches:
+  #     - main
+  #     - master
+  #     - development # 'dev*'
+  #     - dev
   workflow_dispatch:
 
 env:
@@ -67,12 +67,20 @@ jobs:
       - name: Build Project
         run: npm run build
         # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139932#overview
-      - name: Upload Artifacts
+      - name: Upload Build Artifacts
         # https://github.com/actions/upload-artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
+
+        - name: Upload Package Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-files
+          path: |
+            package.json
+            package-lock.json
 
   lint: # The name of job is arbitrary.
     # The actual name used here is important because it allows us to search for
@@ -140,15 +148,21 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Download Artifacts
+      - name: Download Build Artifacts
         # https://github.com/actions/download-artifact
         uses: actions/download-artifact@v4
         with:
           name: dist
-          path: .
+          path: dist
 
       # - name: Verify dist artifact contents
       #   run: ls
+
+      - name: Download Package Files
+        uses: actions/download-artifact@v4
+        with:
+          name: package-files
+          path: .
 
       - name: Cache Dependencies
         uses: actions/cache@v4

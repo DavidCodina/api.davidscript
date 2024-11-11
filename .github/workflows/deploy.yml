@@ -6,10 +6,28 @@ on:
       - main
       - master
 
+  workflow_run:
+    workflows: ['Build, Lint, Test'] # This must match the name in test.yml exactly
+    types:
+      - completed
+    branches:
+      - main
+      - master
+
   workflow_dispatch:
 
 jobs:
+  should-deploy:
+    runs-on: ubuntu-latest
+    # || github.event_name == 'push'
+    if: |
+      github.event.workflow_run.conclusion == 'success' ||  
+      github.event_name == 'workflow_dispatch'
+    steps:
+      - run: echo "Proceeding with deployment..."
+
   deploy:
+    needs: should-deploy
     name: Deploy
     runs-on: ubuntu-latest
     steps:

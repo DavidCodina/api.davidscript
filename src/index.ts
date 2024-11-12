@@ -1,10 +1,10 @@
 import path from 'path'
 import dotenv from 'dotenv'
-import express /*, { Request, Response , NextFunction } */ from 'express'
+//! import express /*, { Request, Response , NextFunction } */ from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import morgan from 'morgan'
-//import mongoose from 'mongoose'
+// import mongoose from 'mongoose'
 import serverless from 'serverless-http'
 import 'source-map-support/register'
 
@@ -76,7 +76,7 @@ app.get('/', (req, res) => {
       secret: process.env.SECRET || '???',
       NODE_ENV: process.env.NODE_ENV || '???'
     },
-    message: `You accessed the '/' route (CICD Test 8).`,
+    message: `You accessed the '/' route (CICD Test 9).`,
     success: true
   })
 })

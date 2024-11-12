@@ -1,8 +1,6 @@
 # The name of this file can be anyting but needs to be .yml
-name: Test
+name: Build, Lint, Test
 
-## Review video 124 **
-# Whenever someone pushes to branch main then run the following job.
 on:
   # https://docs.github.com/en/actions/using-workflows
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
@@ -68,6 +66,8 @@ jobs:
         with:
           name: dist
           path: dist
+      - name: Run Build to Check for Errors
+        run: npm run start
 
   lint: # The name of job is arbitrary.
     # The actual name used here is important because it allows us to search for

@@ -14,6 +14,7 @@ await esbuild.build({
   entryPoints: ['./src/index.ts'],
   outfile: './dist/index.js',
   bundle: true,
+  // logLevel: 'error',
   platform: 'node',
   minify: true,
   // format: 'esm',
@@ -60,7 +61,6 @@ await esbuild.build({
         return true
       }
     })
-
     // Or create a custom plugin to copy files over.
     // {
     //   name: 'custom-plugin',

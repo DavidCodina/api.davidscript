@@ -2,10 +2,8 @@ name: Deploy
 
 on:
   push:
-    # test.yml runs when a pull_request happens in main or master.
-    # In such cases, IF the pull request is then merged,
-    # it may result in a push event into main or master,
-    # which will then trigger this workflow.
+    # Set up branch protection to prevent directly pushing to main or master. Then the
+    # Deploy workflow push event should only be triggered through merging a pull request.
     branches:
       - main
       - master

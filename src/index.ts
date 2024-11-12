@@ -16,6 +16,8 @@ dotenv.config()
 
 const app = express()
 
+const name = 'David' //! Temporary lint failure.
+
 /* ======================
         cors()
 ====================== */

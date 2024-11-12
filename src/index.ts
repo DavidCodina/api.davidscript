@@ -16,8 +16,6 @@ dotenv.config()
 
 const app = express()
 
-const x = 2 //! Temporary
-
 /* ======================
         cors()
 ====================== */

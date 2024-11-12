@@ -2,9 +2,11 @@ name: Deploy
 
 on:
   push:
-    # Branch protection should be set up on GitHub to prevent directly pushing to main or master.
-    # Additionally, I have it set up so that any PR must pass Build, Lint, and Test status checks.
     # The Deploy workflow push event should only be triggered through merging a pull request.
+    # Branch protection is set up on GitHub to prevent directly pushing to main or master.
+    # Additionally, branch proetection requires Build, Lint and Test status checks to pass before
+    # merging.
+
     branches:
       - main
       - master

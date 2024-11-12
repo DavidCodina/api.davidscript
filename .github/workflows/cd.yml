@@ -157,10 +157,11 @@ jobs:
   #--------------------------------------------------------------------------
 
   success:
-    name: Deployment Success
+    name: Deploy Success
     needs: deploy
     # Only run when the deploy job was successful.
-    # In GitHub Actions, if you haven't explicitly set an id for a job, the job's name is used as the identifier.
+    # In GitHub Actions, if you haven't explicitly set an id for a job,
+    # the job's name is used as the identifier.
     if: needs.deploy.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -168,11 +169,10 @@ jobs:
         run: echo "Success!"
 
   failure:
-    name: Deployment Failure
+    name: Deploy Failure
     needs: [build, deploy]
-    # Run when any job in Deploy workflow produces failure.
+    # Run when ANY job in Deploy workflow produces failure.
     if: failure()
-    # if: needs.build.conclusion == 'failure' || needs.deploy.conclusion == 'failure'
     runs-on: ubuntu-latest
     steps:
       - name: Log Failure

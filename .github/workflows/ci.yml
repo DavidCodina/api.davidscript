@@ -160,12 +160,3 @@ jobs:
         run: npm ci
       - name: Run Tests
         run: npm test
-
-  failure:
-    name: CD Failure
-    needs: [build, lint, test]
-    if: failure()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Log Failure
-        run: echo "Failure!"

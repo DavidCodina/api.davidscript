@@ -3,18 +3,7 @@ name: Deploy
 on:
   push:
     # test.yml runs when a pull_request happens in main or master.
-    # In such cases, IF the pull request is then merged,
-
-    # it may result in a push event into main or master,
-    # which will then trigger this workflow.
-    branches:
-      - main
-      - master
-
-  workflow_run:
-    workflows: ['Build, Lint, Test'] # This must match the name in test.yml exactly
-    types:
-      - completed
+    # In such cases, IF the pull request is then merged, it will trigger a push event.
     branches:
       - main
       - master
@@ -22,35 +11,11 @@ on:
   # Manually running the workflow will necessarily result in an error such that:
   # Unable to download artifact(s): Artifact not found for name: dist
   # However, we set continue-on-error: true, and if the dist folder isn't found from
-  # downloading the artificat, then we build it.
+  # downloading the artifact, then we build it.
   workflow_dispatch:
 
 jobs:
-  check-conclusion:
-    name: Check Conclusion
-    runs-on: ubuntu-latest
-    steps:
-      - name: Log Event Payload
-        run: |
-          echo "Event payload:"
-          echo "${{ toJSON(github.event) }}"
-
-      - name: Extract and Log Conclusion
-        run: |
-          conclusion=${{ github.event.workflow_run.conclusion }}
-          echo "Event conclusion: $conclusion"
-
-  should-deploy:
-    runs-on: ubuntu-latest
-    # || github.event_name == 'push'
-    if: |
-      github.event.workflow_run.conclusion == 'success' ||  
-      github.event_name == 'workflow_dispatch'
-    steps:
-      - run: echo "Proceeding with deployment..."
-
   deploy:
-    needs: should-deploy
     name: Deploy
     runs-on: ubuntu-latest
     steps:

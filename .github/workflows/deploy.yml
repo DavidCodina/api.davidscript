@@ -4,81 +4,68 @@ on:
   push:
     # test.yml runs when a pull_request happens in main or master.
     # In such cases, IF the pull request is then merged,
-
     # it may result in a push event into main or master,
     # which will then trigger this workflow.
     branches:
       - main
       - master
 
-  workflow_run:
-    workflows: [Test] # This must match the name in test.yml exactly
-    types:
-      - completed
-    branches:
-      - main
-      - master
-
-  # Manually running the workflow will necessarily result in an error such that:
-  # Unable to download artifact(s): Artifact not found for name: dist
-  # However, we set continue-on-error: true, and if the dist folder isn't found from
-  # downloading the artificat, then we build it.
   workflow_dispatch:
 
 jobs:
-  check-conclusion:
-    name: Check Conclusion
+  build:
+    name: Build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
     steps:
-      - name: Log Event Payload
-        run: |
-          echo "Event payload:"
-          echo "${{ toJSON(github.event) }}"
-
-      - name: Extract and Log Conclusion
-        run: |
-          conclusion=${{ github.event.workflow_run.conclusion }}
-          echo "Event conclusion: $conclusion"
-
-  should-deploy:
-    runs-on: ubuntu-latest
-    # || github.event_name == 'push'
-    if: |
-      github.event.workflow_run.conclusion == 'success' ||  
-      github.event_name == 'workflow_dispatch'
-    steps:
-      - run: echo "Proceeding with deployment..."
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      # Cache dependencies. Must be done in all jobs that install dependencies.
+      # This seems to speed up the process by about 20s.
+      # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139976#overview
+      - name: Cache Dependencies
+        # https://github.com/actions/cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Project
+        run: npm run build
+        # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139932#overview
+      - name: Upload Build Artifacts
+        # https://github.com/actions/upload-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
 
   deploy:
-    needs: should-deploy
+    needs: [build]
     name: Deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: ${{ matrix.node-version }}
 
-      # Attempt to download the artifact
       - name: Download Build Artifacts
-        id: download-artifact
-        continue-on-error: true # Allow the workflow to continue if this fails
+        # https://github.com/actions/download-artifact
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
 
-      # Check if dist folder exists and has contents
-      - name: Check dist folder
-        id: check-dist
-        run: |
-          if [ -d "dist" ] && [ "$(ls -A dist)" ]; then
-            echo "dist_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "dist_exists=false" >> $GITHUB_OUTPUT
-          fi
+      # - name: Verify dist artifact contents
+      #   run: ls
 
       - name: Cache Dependencies
         uses: actions/cache@v4
@@ -88,13 +75,6 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
-
-      - name: Build Project
-        if: steps.check-dist.outputs.dist_exists != 'true'
-        run: npm run build
-
-      # - name: Verify dist artifact contents
-      #   run: ls
 
       - name: Create Deployment Package
         # Assumes a package.json script of:

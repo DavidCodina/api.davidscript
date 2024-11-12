@@ -158,14 +158,16 @@ jobs:
 
   success:
     name: Deployment Success
-    if: success()
+    # Only run when the deploy job was successful.
+    if: needs.deploy.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Log Success
         run: echo "Success!"
 
   failure:
-    name: Deployment Success
+    name: Deployment Failure
+    # Run when any job in Deploy workflow produces failure.
     if: failure()
     runs-on: ubuntu-latest
     steps:

@@ -77,7 +77,7 @@ app.get('/', (req, res) => {
       secret: process.env.SECRET || '???',
       NODE_ENV: process.env.NODE_ENV || '???'
     },
-    message: `You accessed the '/' route. 🤪`,
+    message: `You accessed the '/' route. 😎`,
     success: true
   })
 })

@@ -13,6 +13,7 @@ import healthRoute from './routes/healthRoute'
 import appUseSwagger from 'utils/swagger'
 
 dotenv.config()
+
 const app = express()
 
 /* ======================
@@ -76,7 +77,7 @@ app.get('/', (req, res) => {
       secret: process.env.SECRET || '???',
       NODE_ENV: process.env.NODE_ENV || '???'
     },
-    message: `You accessed the '/' route!`,
+    message: `You accessed the '/' route...`,
     success: true
   })
 })
@@ -97,6 +98,17 @@ app.use(errorHandler)
 /* ======================
 
 ====================== */
+///////////////////////////////////////////////////////////////////////////
+//
+// The .github/workflows for CI and CD must set:
+//
+//   env:
+//     NODE_ENV: development
+//     PORT: 5000
+//
+// Otherwise, it will break the build job when it attempts to start the app.
+//
+///////////////////////////////////////////////////////////////////////////
 
 if (process.env.NODE_ENV === 'development') {
   const port = process.env.PORT || 5000

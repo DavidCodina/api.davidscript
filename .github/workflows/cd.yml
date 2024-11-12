@@ -134,12 +134,12 @@ jobs:
       #         --zip-file fileb://upload.zip
       #     fi
 
-      - name: Deploy to Lambda
-        id: deploy-to-lambda
-        run: |
-          aws lambda update-function-code \
-            --function-name davidscript-server \
-            --zip-file fileb://upload.zip
+      # - name: Deploy to Lambda
+      #   id: deploy-to-lambda
+      #   run: |
+      #     aws lambda update-function-code \
+      #       --function-name davidscript-server \
+      #       --zip-file fileb://upload.zip
 
   #--------------------------------------------------------------------------
   #

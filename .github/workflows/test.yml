@@ -98,8 +98,9 @@ jobs:
         run: npm ci
       - name: Lint src
         # This will only fail if it encounters "error" not "warn"
-        # max-warnings=0 will cause ESLint to exit with a non-zero status code if any warnings are found.
-        run: npm run lint --max-warnings=0
+        # run: npm run lint
+        # This will cause ESLint to exit with a non-zero status code if any warnings are found.
+        run: npx eslint src --max-warnings=0
 
   test:
     name: Test

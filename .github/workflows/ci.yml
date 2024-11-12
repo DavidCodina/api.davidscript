@@ -29,7 +29,7 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_ENV: development
+  NODE_ENV: development # For `Run Build` step to pass.
   PORT: 5000
   # MONGO_URI: mongodb://localhost:27017/demo
 

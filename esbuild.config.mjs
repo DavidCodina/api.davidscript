@@ -1,3 +1,13 @@
+///////////////////////////////////////////////////////////////////////////
+//
+// Note: esbuild does not natively perform type checking or linting; it is primarily a bundler and optimizer.
+// This means that it will not exit the build process if there are errors within the code.
+// In order to prevent the build when there are Typescript errors we can do the following:
+//
+//   "build": "npm run typescript && node esbuild.config.mjs",
+//   "typescript": "tsc --noEmit",
+//
+///////////////////////////////////////////////////////////////////////////
 import fs from 'fs'
 import { execSync } from 'child_process'
 import * as esbuild from 'esbuild'
@@ -151,7 +161,7 @@ await esbuild.build({
 //
 //   CREATE_ZIP=true npm run build
 //
-// However, it's still easier to just use something like beszip:
+// However, it's still easier to just use something like bestzip:
 // "zip": "bestzip upload.zip dist/* package.json", which seems like
 // it also does a better job of compressing the files.
 //

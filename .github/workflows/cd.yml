@@ -47,6 +47,7 @@ jobs:
         with:
           name: dist
           path: dist
+
       - name: Run Build to Check for Errors
         run: |
           npm start & sleep 2
@@ -84,10 +85,8 @@ jobs:
         run: npm ci
 
       - name: Create Deployment Package
-        # Assumes a package.json script of:
-        # "zip": "bestzip upload.zip dist/* package.json",
-        ## Or do `npx bestzip upload.zip dist/* package.json`
-        run: npm run zip
+        # This assumes bestzip is in package.json dependencies.
+        run: npx bestzip upload.zip dist/* package.json
 
       - name: Configure AWS credentials
         # https://github.com/aws-actions/configure-aws-credentials
@@ -99,6 +98,35 @@ jobs:
 
       # The aws-cli comes pre-installed on GitHub Actions' Ubuntu runners, including ubuntu-latest. This means you don't
       # need to install any additional tools for the aws lambda command to work in your GitHub workflow.
+      # Note: the Lambda function would not be created automatically if it didn't exist, you would encounter an error.
+      # To create a new Lambda function, you would need to use the aws lambda create-function command.
+      #
+      # If you wanted to run logic to creat or update it would look something like this, but this is still just example code:
+      #
+      # - name: Check if Lambda Function Exists
+      #   id: check-lambda
+      #   run: |
+      #     aws lambda get-function --function-name davidscript-server || echo "NOT_FOUND"
+
+      # - name: Create or Update Lambda Function
+      #   run: |
+      #     if [ "${{ steps.check-lambda.outputs.stdout }}" == "NOT_FOUND" ]; then
+      #       echo "Creating Lambda function"
+      #       aws lambda create-function \
+      #         --function-name davidscript-server \
+      #         --runtime nodejs22.x \
+      #         --role arn:aws:iam::account-id:role/execution_role \
+      #         --handler index.handler \
+      #         --zip-file fileb://upload.zip \
+      #         --description "My Lambda function for deploying server" \
+      #         --timeout 15 \
+      #     else
+      #       echo "Updating Lambda function"
+      #       aws lambda update-function-code \
+      #         --function-name davidscript-server \
+      #         --zip-file fileb://upload.zip
+      #     fi
+
       - name: Deploy to Lambda
         run: |
           aws lambda update-function-code \

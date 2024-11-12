@@ -1,11 +1,9 @@
-# The name of this file can be anyting but needs to be .yml
-name: Typescript, Build, Lint, Test
+# https://docs.github.com/en/actions/using-workflows
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+name: Build, Lint, Test
 
 on:
-  # https://docs.github.com/en/actions/using-workflows
-  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows
-  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
-
   #--------------------------------------------------------------------------
   #
   # Note:
@@ -24,8 +22,8 @@ on:
     branches:
       - main
       - master
-      # - development # 'dev*'
-      # - dev
+      - development # 'dev*'
+      - dev
   workflow_dispatch:
 
 env:
@@ -34,29 +32,41 @@ env:
   # MONGO_URI: mongodb://localhost:27017/demo
 
 jobs:
+  #--------------------------------------------------------------------------
+  #
   # Because the lint job is set up to error out on warnings, it's likely that
   # in many cases a Typescript error will also cause an error in the lint job.
-  typescript-check:
-    name: TypeScript Check
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Cache Dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: node_modules-${{ hashFiles('**/package-lock.json') }}
-      - name: Install Dependencies
-        run: npm ci
-      - name: Run tsc
-        run: npx tsc --noEmit
+  # That said, this job is no longer necessary because the package.json build command
+  # already bakes in a typescript checks and returns early if there are errors.
+  #
+  #   "build": "npm run typescript && node esbuild.config.mjs",
+  #   "typescript": "tsc --noEmit",
+  #
+  # This build command is pretty strict. If there is a single typescript error, it will fail.
+  #
+  #--------------------------------------------------------------------------
+
+  # typescript:
+  #   name: TypeScript Check
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node-version: [22.x]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Use Node.js ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ matrix.node-version }}
+  #     - name: Cache Dependencies
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.npm
+  #         key: node_modules-${{ hashFiles('**/package-lock.json') }}
+  #     - name: Install Dependencies
+  #       run: npm ci
+  #     - name: Run tsc
+  #       run: npx tsc --noEmit
 
   build:
     name: Build
@@ -91,8 +101,6 @@ jobs:
           name: dist
           path: dist
       - name: Run Build to Check for Errors
-        ## This works, but it's not great.
-        ## Ideally, there's a way to throw an error if esbuild fails.
         run: |
           npm start & sleep 2
           pkill -f "node dist/index.js"

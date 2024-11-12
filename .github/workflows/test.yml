@@ -1,5 +1,5 @@
 # The name of this file can be anyting but needs to be .yml
-name: Build, Lint, Test
+name: Test
 
 ## Review video 124 **
 # Whenever someone pushes to branch main then run the following job.

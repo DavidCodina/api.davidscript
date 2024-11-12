@@ -152,21 +152,27 @@ jobs:
   #       echo "Failure!"
   #     fi
   #
-  # A better/cleaner approach is to have distinct
+  # A better/cleaner approach is to have distinct success and failure jobs.
   #
   #--------------------------------------------------------------------------
 
   success:
     name: Deployment Success
     if: success()
-    run: echo "Success!"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Success
+        run: echo "Success!"
 
   failure:
     name: Deployment Success
     if: failure()
-    # In a production app, a more practical approach in the 'failure'
-    # case would be to log the error details, notify the team, or trigger a rollback.
-    run: echo "Failure!"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log Failure
+        # In a production app, a more practical approach in the 'failure'
+        # case would be to log the error details, notify the team, or trigger a rollback.
+        run: echo "Failure!"
 
   # bonus:
   #   needs: deploy

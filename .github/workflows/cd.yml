@@ -10,6 +10,10 @@ on:
 
   workflow_dispatch:
 
+env:
+  NODE_ENV: development # For `Run Build` step to pass
+  PORT: 5000
+
 jobs:
   build:
     name: Build
@@ -44,8 +48,6 @@ jobs:
           name: dist
           path: dist
       - name: Run Build to Check for Errors
-        ## This works, but it's not great.
-        ## Ideally, there's a way to throw an error if esbuild fails.
         run: |
           npm start & sleep 2
           pkill -f "node dist/index.js"

@@ -59,6 +59,7 @@ jobs:
 
   deploy:
     needs: [build]
+    id: deploy
     name: Deploy
     runs-on: ubuntu-latest
     steps:
@@ -130,12 +131,12 @@ jobs:
       #         --zip-file fileb://upload.zip
       #     fi
 
-      - name: Deploy to Lambda
-        id: deploy-to-lambda
-        run: |
-          aws lambda update-function-code \
-            --function-name davidscript-server \
-            --zip-file fileb://upload.zip
+      # - name: Deploy to Lambda
+      #   id: deploy-to-lambda
+      #   run: |
+      #     aws lambda update-function-code \
+      #       --function-name davidscript-server \
+      #       --zip-file fileb://upload.zip
 
   #--------------------------------------------------------------------------
   #
@@ -160,9 +161,7 @@ jobs:
     name: Deploy Success
     needs: deploy
     # Only run when the deploy job was successful.
-    # In GitHub Actions, if you haven't explicitly set an id for a job,
-    # the job's name is used as the identifier.
-    if: needs.deploy.conclusion == 'success'
+    if: ${{ needs.deploy.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Log Success

@@ -34,6 +34,8 @@ env:
   # MONGO_URI: mongodb://localhost:27017/demo
 
 jobs:
+  # Because the lint job is set up to error out on warnings, it's likely that
+  # in many cases, a Typescript error will also cause an error in the lint job.
   typescript-check:
     name: TypeScript Check
     runs-on: ubuntu-latest

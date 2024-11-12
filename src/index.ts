@@ -15,7 +15,7 @@ import appUseSwagger from 'utils/swagger'
 dotenv.config()
 const app = express()
 
-const x: string = 2
+const x: string = 2 // eslint-disable-line
 
 /* ======================
         cors()

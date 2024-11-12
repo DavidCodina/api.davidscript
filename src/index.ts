@@ -15,8 +15,6 @@ import appUseSwagger from 'utils/swagger'
 dotenv.config()
 const app = express()
 
-const x = true
-
 /* ======================
         cors()
 ====================== */

@@ -1,6 +1,6 @@
 import path from 'path'
 import dotenv from 'dotenv'
-//! import express /*, { Request, Response , NextFunction } */ from 'express'
+import express /*, { Request, Response , NextFunction } */ from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import morgan from 'morgan'
@@ -14,6 +14,8 @@ import appUseSwagger from 'utils/swagger'
 
 dotenv.config()
 const app = express()
+
+const x = true
 
 /* ======================
         cors()

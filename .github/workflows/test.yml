@@ -68,7 +68,7 @@ jobs:
           path: dist
       - name: Run Build to Check for Errors
         run: |
-          npm start & sleep 3
+          npm start & sleep 2
           pkill -f "node dist/index.js"
           echo "Build check completed."
 

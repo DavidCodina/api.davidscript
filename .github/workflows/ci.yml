@@ -1,5 +1,5 @@
 # The name of this file can be anyting but needs to be .yml
-name: Build, Lint, Test
+name: Typescript, Build, Lint, Test
 
 on:
   # https://docs.github.com/en/actions/using-workflows
@@ -35,7 +35,7 @@ env:
 
 jobs:
   # Because the lint job is set up to error out on warnings, it's likely that
-  # in many cases, a Typescript error will also cause an error in the lint job.
+  # in many cases a Typescript error will also cause an error in the lint job.
   typescript-check:
     name: TypeScript Check
     runs-on: ubuntu-latest
@@ -91,7 +91,7 @@ jobs:
           name: dist
           path: dist
       - name: Run Build to Check for Errors
-        ## This works but it's not great.
+        ## This works, but it's not great.
         ## Ideally, there's a way to throw an error if esbuild fails.
         run: |
           npm start & sleep 2

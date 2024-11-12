@@ -43,6 +43,13 @@ jobs:
         with:
           name: dist
           path: dist
+      - name: Run Build to Check for Errors
+        ## This works, but it's not great.
+        ## Ideally, there's a way to throw an error if esbuild fails.
+        run: |
+          npm start & sleep 2
+          pkill -f "node dist/index.js"
+          echo "Build check completed."
 
   deploy:
     needs: [build]
@@ -77,6 +84,7 @@ jobs:
       - name: Create Deployment Package
         # Assumes a package.json script of:
         # "zip": "bestzip upload.zip dist/* package.json",
+        ## Or do `npx bestzip upload.zip dist/* package.json`
         run: npm run zip
 
       - name: Configure AWS credentials

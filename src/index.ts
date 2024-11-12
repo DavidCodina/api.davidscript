@@ -15,8 +15,6 @@ import appUseSwagger from 'utils/swagger'
 dotenv.config()
 const app = express()
 
-const x: string = 2 // eslint-disable-line
-
 /* ======================
         cors()
 ====================== */
@@ -78,7 +76,7 @@ app.get('/', (req, res) => {
       secret: process.env.SECRET || '???',
       NODE_ENV: process.env.NODE_ENV || '???'
     },
-    message: `You accessed the '/' route (CICD Test 10).`,
+    message: `You accessed the '/' route (CICD Test 11).`,
     success: true
   })
 })

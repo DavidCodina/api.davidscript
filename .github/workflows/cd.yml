@@ -51,7 +51,7 @@ jobs:
           name: dist
           path: dist
 
-      # - name: Simulate Build Failure
+      # - name: Simulate build job failure
       #   run: exit 1
 
       - name: Run Build to Check for Errors
@@ -94,9 +94,8 @@ jobs:
         # This assumes bestzip is in package.json dependencies.
         run: npx bestzip upload.zip dist/* package.json
 
-      #! Temporary failure simulation to test failure job
-      - name: Simulate Deploy Failure
-        run: exit 1
+      # - name: Simulate deploy job failure
+      #   run: exit 1
 
       - name: Configure AWS credentials
         # https://github.com/aws-actions/configure-aws-credentials
@@ -111,12 +110,12 @@ jobs:
       # Note: the Lambda function would not be created automatically if it didn't exist, you would encounter an error.
       # To create a new Lambda function, you would need to use the aws lambda create-function command.
 
-      # - name: Deploy to Lambda
-      #   id: deploy-to-lambda
-      #   run: |
-      #     aws lambda update-function-code \
-      #       --function-name davidscript-server \
-      #       --zip-file fileb://upload.zip
+      - name: Deploy to Lambda
+        id: deploy-to-lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name davidscript-server \
+            --zip-file fileb://upload.zip
 
   #--------------------------------------------------------------------------
   #

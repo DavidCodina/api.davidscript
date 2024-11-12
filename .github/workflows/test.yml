@@ -34,6 +34,30 @@ env:
   # MONGO_URI: mongodb://localhost:27017/demo
 
 jobs:
+  # Because the lint job is set up to error out on warnings, it's likely that
+  # in many cases, a Typescript error will also cause an error in the lint job.
+  typescript-check:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run tsc
+        run: npx tsc --noEmit
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -67,8 +91,10 @@ jobs:
           name: dist
           path: dist
       - name: Run Build to Check for Errors
+        ## This works but it's not great.
+        ## Ideally, there's a way to throw an error if esbuild fails.
         run: |
-          npm start & sleep 3
+          npm start & sleep 2
           pkill -f "node dist/index.js"
           echo "Build check completed."
 
@@ -97,7 +123,10 @@ jobs:
       - name: Install Dependencies
         run: npm ci
       - name: Lint src
-        run: npm run lint
+        # This will only fail if it encounters "error" not "warn"
+        # run: npm run lint
+        # This will cause ESLint to exit with a non-zero status code if any warnings are found.
+        run: npx eslint src --max-warnings=0
 
   test:
     name: Test

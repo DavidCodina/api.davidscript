@@ -136,13 +136,37 @@ jobs:
           aws lambda update-function-code \
             --function-name davidscript-server \
             --zip-file fileb://upload.zip
-      - name: Deployment Result
-        run: |
-          if [ "${{ steps.deploy-to-lambda.outcome }}" == "success" ]; then
-            echo "Success!"
-          elif [ "${{ steps.deploy-to-lambda.outcome }}" == "failure" ]; then
-            echo "Failure!"
-          fi
+
+  #--------------------------------------------------------------------------
+  #
+  # We could do a failure check at the step level, but then that would tell us
+  # nothing if the build job failed:
+  #
+  # distinct success and failure jobs
+  # - name: Deployment Result
+  #   if: always()
+  #   run: |
+  #     if [ "${{ steps.deploy-to-lambda.conclusion }}" == "success" ]; then
+  #       echo "Success!"
+  #     elif [ "${{ steps.deploy-to-lambda.conclusion }}" == "failure" ]; then
+  #       echo "Failure!"
+  #     fi
+  #
+  # A better/cleaner approach is to have distinct
+  #
+  #--------------------------------------------------------------------------
+
+  success:
+    name: Deployment Success
+    if: success()
+    run: echo "Success!"
+
+  failure:
+    name: Deployment Success
+    if: failure()
+    # In a production app, a more practical approach in the 'failure'
+    # case would be to log the error details, notify the team, or trigger a rollback.
+    run: echo "Failure!"
 
   # bonus:
   #   needs: deploy

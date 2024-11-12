@@ -77,6 +77,7 @@ jobs:
       - name: Create Deployment Package
         # Assumes a package.json script of:
         # "zip": "bestzip upload.zip dist/* package.json",
+        ## Or do `npx bestzip upload.zip dist/* package.json`
         run: npm run zip
 
       - name: Configure AWS credentials

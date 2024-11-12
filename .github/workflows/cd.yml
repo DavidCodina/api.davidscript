@@ -166,7 +166,7 @@ jobs:
         run: echo "Success!"
 
   failure:
-    name: Deployment Success
+    name: Deployment Failure
     # Run when any job in Deploy workflow produces failure.
     if: failure()
     runs-on: ubuntu-latest

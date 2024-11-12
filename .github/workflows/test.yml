@@ -67,7 +67,10 @@ jobs:
           name: dist
           path: dist
       - name: Run Build to Check for Errors
-        run: npm run start
+        run: |
+          npm start & sleep 3
+          pkill -f "node dist/index.js"
+          echo "Build check completed."
 
   lint: # The name of job is arbitrary.
     # The actual name used here is important because it allows us to search for

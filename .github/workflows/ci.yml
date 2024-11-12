@@ -18,6 +18,9 @@ on:
   #
   #--------------------------------------------------------------------------
 
+  # Currently, there is no branch protection on `development`. However, in a production app
+  # we definitely want to prevent direct pushes to `development` and ensure that the Build,
+  # Lint and Test status checks pass before merging.
   pull_request:
     branches:
       - main

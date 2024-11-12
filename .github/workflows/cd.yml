@@ -159,7 +159,8 @@ jobs:
   success:
     name: Deployment Success
     # Only run when the deploy job was successful.
-    if: needs.deploy.result == 'success'
+    # In GitHub Actions, if you haven't explicitly set an id for a job, the job's name is used as the identifier.
+    if: needs.deploy.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Log Success

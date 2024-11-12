@@ -131,10 +131,18 @@ jobs:
       #     fi
 
       - name: Deploy to Lambda
+        id: deploy-to-lambda
         run: |
           aws lambda update-function-code \
             --function-name davidscript-server \
             --zip-file fileb://upload.zip
+      - name: Deployment Result
+        run: |
+          if [ "${{ steps.deploy-to-lambda.outcome }}" == "success" ]; then
+            echo "Success!"
+          elif [ "${{ steps.deploy-to-lambda.outcome }}" == "failure" ]; then
+            echo "Failure!"
+          fi
 
   # bonus:
   #   needs: deploy

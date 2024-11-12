@@ -34,6 +34,28 @@ env:
   # MONGO_URI: mongodb://localhost:27017/demo
 
 jobs:
+  typescript-check:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: node_modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run tsc
+        run: npx tsc --noEmit
+
   build:
     name: Build
     runs-on: ubuntu-latest

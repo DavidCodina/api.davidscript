@@ -45,7 +45,7 @@ describe('sum()...', () => {
     const received = sum(value)
 
     // Assert
-    expect(received).not.toBe(expected)
+    expect(received).toBe(expected)
   })
 
   /* ======================

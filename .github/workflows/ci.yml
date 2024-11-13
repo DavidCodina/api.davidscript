@@ -50,20 +50,7 @@ jobs:
       #--------------------------------------------------------------------------
       #
       # Here we are caching node_modules, and skipping the `Install Dependencies` step
-      # if node_modules has been cached in a previous workflow run. However, this approach
-      # is generally not recommeded. Why?
-      #
-      #   1. node_modules can get into inconsistent states (corrupted files, partial installations)
-      #   2. When you cache it directly and skip npm ci, you're trusting that cached state completely
-      #   3. Different OS/environments might handle the cached node_modules differently
-      #   4. Node.js native modules might not work correctly when cached across different environments
-      #
-      # The preferred approach is to remove the conditional if statement below:
-      #
-      #  - name: Install Dependencies
-      #   if: steps.cache.outputs.cache-hit != 'true'
-      #
-      # Also remove the entire `Cache Dependencies` step.
+      # if node_modules has been cached in a previous workflow run.
       #
       # - name: Cache Dependencies
       #   id: cache
@@ -72,7 +59,19 @@ jobs:
       #     path: node_modules
       #     key: node_modules-${{ hashFiles('package-lock.json') }}
       #
-      # Instead use this above:
+      # - name: Install Dependencies
+      #   if: steps.cache.outputs.cache-hit != 'true'
+      #   run: npm ci
+      #
+      # However, this approach is generally not recommended. Why?
+      #
+      #   1. node_modules can get into inconsistent states (corrupted files, partial installations)
+      #   2. When you cache it directly and skip npm ci, you're trusting that cached state completely
+      #   3. Different OS/environments might handle the cached node_modules differently
+      #   4. Node.js native modules might not work correctly when cached across different environments
+      #
+      # The preferred approach is to remove the conditional if statement.
+      # Also remove the entire `Cache Dependencies` step. Instead use this above:
       #
       # with:
       #   node-version: 22.x

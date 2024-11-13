@@ -18,7 +18,17 @@ env:
   PORT: 5000
 
 jobs:
-  build:
+  # Gotcha: Previously I was using strategy + matrix syntax just to specify Node.js 22.x
+  # That seemed unnecessary because I was ONLY using 22.x. However, when I removed that
+  # syntax it created an issue.
+  #
+  # The issue you're experiencing with the duplicate jobs hanging in your GitHub Actions
+  # workflow may be related to how the jobs are defined and executed without the strategy
+  # and matrix syntax. Here are a few things to check and potential solutions:
+  #
+  # Ensure that the job names (Build, Lint, Test) are unique across your workflow.
+  # If there are any duplicate job names, GitHub Actions may not handle them correctly.
+  build-before-deploy:
     name: Build
     runs-on: ubuntu-latest
     steps:

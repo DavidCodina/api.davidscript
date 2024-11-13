@@ -44,18 +44,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-      # Cache dependencies. Must be done in all jobs that install dependencies.
-      # This seems to speed up the process by about 20s.
-      # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139976#overview
       - name: Cache Dependencies
-        # https://github.com/actions/cache
-        uses: actions/cache@v4
+        id: cache
+        uses: actions/cache@v4 # https://github.com/actions/cache
         with:
-          ## Lesson 86 suggests caching node_modules instead of ~/.npm
-          ## Rewatch that and update as needed.
-          path: ~/.npm
+          path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Build Project
         #--------------------------------------------------------------------------
@@ -68,8 +64,6 @@ jobs:
         #
         # Because the lint job is set up to error out on warnings, it's likely that
         # in many cases a Typescript error will also cause an error in the lint job.
-        # That said, this job is no longer necessary because the package.json build command
-        # already bakes in a typescript checks and returns early if there are errors.
         #
         #--------------------------------------------------------------------------
         run: npm run build
@@ -86,7 +80,7 @@ jobs:
           pkill -f "node dist/index.js"
           echo "Build check completed."
 
-  lint: # The name of job is arbitrary.
+  lint:
     # The actual name used here is important because it allows us to search for
     # the correct status check when Requiring status checks to pass before merging.
     # This is set up in GitHub branch --> Settings --> Branches.
@@ -97,20 +91,23 @@ jobs:
       # https://github.com/marketplace/actions/checkout
       # https://github.com/actions/checkout
       - uses: actions/checkout@v4
+
       - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
+
       - name: Cache Dependencies
+        id: cache
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Lint src
-        # This will only fail if it encounters "error" not "warn"
-        # run: npm run lint
+        # This will only fail if it encounters "error" not "warn" : run: npm run lint
         # This will cause ESLint to exit with a non-zero status code if any warnings are found.
         run: npx eslint src --max-warnings=0
 
@@ -124,11 +121,13 @@ jobs:
         with:
           node-version: 22.x
       - name: Cache Dependencies
+        id: cache
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Run Tests
         run: npm test

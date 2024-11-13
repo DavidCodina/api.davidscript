@@ -6,7 +6,6 @@ on:
     # Branch protection is set up on GitHub to prevent directly pushing to main or master.
     # Additionally, branch proetection requires Build, Lint and Test status checks to pass before
     # merging.
-
     branches:
       - main
       - master
@@ -27,21 +26,36 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-      # Cache dependencies. Must be done in all jobs that install dependencies.
-      # This seems to speed up the process by about 20s.
-      # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139976#overview
+
+      #--------------------------------------------------------------------------
+      #
+      # Previous:
+      #
+      #  - name: Cache Dependencies
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.npm
+      #     key: node_modules-${{ hashFiles('**/package-lock.json') }}
+      # - name: Install Dependencies
+      #   run: npm ci
+      #
+      #--------------------------------------------------------------------------
+
       - name: Cache Dependencies
-        # https://github.com/actions/cache
-        uses: actions/cache@v4
+        id: cache
+        uses: actions/cache@v4 # https://github.com/actions/cache
         with:
-          ## Lesson 86 suggests caching node_modules instead of ~/.npm
-          ## Rewatch that and update as needed.
-          path: ~/.npm
+          path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
+
+      #--------------------------------------------------------------------------
       - name: Build Project
         run: npm run build
+
         # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139932#overview
       - name: Upload Build Artifacts
         # https://github.com/actions/upload-artifact
@@ -81,14 +95,13 @@ jobs:
       #   run: ls
 
       - name: Cache Dependencies
+        id: cache
         uses: actions/cache@v4
         with:
-          ## Lesson 86 suggests caching node_modules instead of ~/.npm
-          ## Rewatch that and update as needed.
-          path: ~/.npm
+          path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
-
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Create Deployment Package
@@ -117,25 +130,6 @@ jobs:
           aws lambda update-function-code \
             --function-name davidscript-server \
             --zip-file fileb://upload.zip
-
-  #--------------------------------------------------------------------------
-  #
-  # We could do a failure check at the step level, but then that would tell us
-  # nothing if the build job failed:
-  #
-  # distinct success and failure jobs
-  # - name: Deployment Result
-  #   if: always()
-  #   run: |
-  #     if [ "${{ steps.deploy-to-lambda.conclusion }}" == "success" ]; then
-  #       echo "Success!"
-  #     elif [ "${{ steps.deploy-to-lambda.conclusion }}" == "failure" ]; then
-  #       echo "Failure!"
-  #     fi
-  #
-  # A better/cleaner approach is to have distinct success and failure jobs.
-  #
-  #--------------------------------------------------------------------------
 
   success:
     name: Deploy Success

@@ -3,15 +3,6 @@
 # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
 name: Build, Lint, Test
 
-# Take 1:
-# Build:   23s
-# Lint:    17s
-# Test:    24s
-
-# Take 2:
-# Build:   ???s
-# Lint:    ???s
-# Test:    ??s
 on:
   #--------------------------------------------------------------------------
   #
@@ -53,18 +44,47 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          #! cache: 'npm'
-          #! cache-dependency-path: package-lock.json
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
 
-      - name: Cache Dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('package-lock.json') }}
+      #--------------------------------------------------------------------------
+      #
+      # Here we are caching node_modules, and skipping the `Install Dependencies` step
+      # if node_modules has been cached in a previous workflow run. However, this approach
+      # is generally not recommeded. Why?
+      #
+      #   1. node_modules can get into inconsistent states (corrupted files, partial installations)
+      #   2. When you cache it directly and skip npm ci, you're trusting that cached state completely
+      #   3. Different OS/environments might handle the cached node_modules differently
+      #   4. Node.js native modules might not work correctly when cached across different environments
+      #
+      # The preferred approach is to remove the conditional if statement below:
+      #
+      #  - name: Install Dependencies
+      #   if: steps.cache.outputs.cache-hit != 'true'
+      #
+      # Also remove the entire `Cache Dependencies` step.
+      #
+      # - name: Cache Dependencies
+      #   id: cache
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: node_modules
+      #     key: node_modules-${{ hashFiles('package-lock.json') }}
+      #
+      # Instead use this above:
+      #
+      # with:
+      #   node-version: 22.x
+      #   cache: 'npm'
+      #   cache-dependency-path: package-lock.json
+      #
+      # That said, the cache behavior then becomes negligible in this case, most likely because
+      # the `npm ci` command is actually what takes the longest.
+      #
+      #--------------------------------------------------------------------------
 
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Build Project
         #--------------------------------------------------------------------------
@@ -99,7 +119,6 @@ jobs:
     # This is set up in GitHub branch --> Settings --> Branches.
     name: Lint
     runs-on: ubuntu-latest
-
     steps:
       # https://github.com/marketplace/actions/checkout
       # https://github.com/actions/checkout
@@ -108,17 +127,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          #! cache: 'npm'
-          #! cache-dependency-path: package-lock.json
-
-      - name: Cache Dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('package-lock.json') }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Lint src
         # This will only fail if it encounters "error" not "warn" : run: npm run lint
@@ -134,18 +145,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          #! cache: 'npm'
-          #! cache-dependency-path: package-lock.json
-
-      - name: Cache Dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('package-lock.json') }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
 
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Run Tests
         run: npm test

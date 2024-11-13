@@ -26,36 +26,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-
-      #--------------------------------------------------------------------------
-      #
-      # Previous:
-      #
-      #  - name: Cache Dependencies
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: ~/.npm
-      #     key: node_modules-${{ hashFiles('**/package-lock.json') }}
-      # - name: Install Dependencies
-      #   run: npm ci
-      #
-      #--------------------------------------------------------------------------
-
-      - name: Cache Dependencies
-        id: cache
-        uses: actions/cache@v4 # https://github.com/actions/cache
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-lock.json') }}
-
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
-
-      #--------------------------------------------------------------------------
       - name: Build Project
         run: npm run build
-
         # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139932#overview
       - name: Upload Build Artifacts
         # https://github.com/actions/upload-artifact
@@ -63,10 +39,8 @@ jobs:
         with:
           name: dist
           path: dist
-
       # - name: Simulate build job failure
       #   run: exit 1
-
       - name: Run Build to Check for Errors
         run: |
           npm start & sleep 2
@@ -83,34 +57,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
       - name: Download Build Artifacts
         # https://github.com/actions/download-artifact
         uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist
-
       # - name: Verify dist artifact contents
       #   run: ls
-
-      - name: Cache Dependencies
-        id: cache
-        uses: actions/cache@v4
-        with:
-          path: node_modules
-          key: node_modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
-
       - name: Create Deployment Package
         # This assumes bestzip is in package.json dependencies.
         run: npx bestzip upload.zip dist/* package.json
-
       # - name: Simulate deploy job failure
       #   run: exit 1
-
       - name: Configure AWS credentials
         # https://github.com/aws-actions/configure-aws-credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -123,7 +86,6 @@ jobs:
       # need to install any additional tools for the aws lambda command to work in your GitHub workflow.
       # Note: the Lambda function would not be created automatically if it didn't exist, you would encounter an error.
       # To create a new Lambda function, you would need to use the aws lambda create-function command.
-
       - name: Deploy to Lambda
         id: deploy-to-lambda
         run: |

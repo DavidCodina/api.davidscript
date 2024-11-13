@@ -3,10 +3,15 @@
 # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
 name: Build, Lint, Test
 
-#` Take 1:
+# Take 1:
 # Lint:    19s
 # Build:   20s
 # Test:    21s
+
+# Take 2:
+# Lint:    21s
+# Build:   25s
+# Test:    17s
 on:
   #--------------------------------------------------------------------------
   #
@@ -48,11 +53,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-      # The Install Dependencies step with npm ci will still run and show a checkmark (✓),
-      # but it will be much faster because the packages are cached.
+          #! cache: 'npm'
+          #! cache-dependency-path: package-lock.json
+
+      - name: Cache Dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Build Project
         #--------------------------------------------------------------------------
@@ -96,9 +108,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          #! cache: 'npm'
+          #! cache-dependency-path: package-lock.json
+
+      - name: Cache Dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Lint src
         # This will only fail if it encounters "error" not "warn" : run: npm run lint
@@ -114,9 +134,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
+          #! cache: 'npm'
+          #! cache-dependency-path: package-lock.json
+
+      - name: Cache Dependencies
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
       - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci
       - name: Run Tests
         run: npm test

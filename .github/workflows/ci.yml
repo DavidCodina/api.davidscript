@@ -3,6 +3,10 @@
 # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
 name: Build, Lint, Test
 
+#` Take 1:
+# Lint:    19s
+# Build:   20s
+# Test:    21s
 on:
   #--------------------------------------------------------------------------
   #

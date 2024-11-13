@@ -4,14 +4,14 @@
 name: Build, Lint, Test
 
 # Take 1:
-# Lint:    19s
-# Build:   20s
-# Test:    21s
+# Build:   23s
+# Lint:    17s
+# Test:    24s
 
 # Take 2:
-# Lint:    21s
-# Build:   25s
-# Test:    17s
+# Build:   ???s
+# Lint:    ???s
+# Test:    ??s
 on:
   #--------------------------------------------------------------------------
   #

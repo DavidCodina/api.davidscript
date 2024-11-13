@@ -50,8 +50,13 @@ jobs:
         with:
           path: node_modules
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
-      - name: Check Cache Status
-        run: echo "Cache hit: ${{ steps.cache.outputs.cache-hit }}"
+
+      - name: Debug Cache
+        run: |
+          echo "Cache hit: ${{ steps.cache.outputs.cache-hit }}"
+          echo "Cache key: node_modules-${{ hashFiles('**/package-lock.json') }}"
+          ls -la node_modules || echo "no node_modules directory"
+
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
         run: npm ci

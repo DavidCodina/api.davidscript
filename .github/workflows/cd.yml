@@ -21,15 +21,12 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
       # Cache dependencies. Must be done in all jobs that install dependencies.
       # This seems to speed up the process by about 20s.
       # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139976#overview
@@ -37,6 +34,8 @@ jobs:
         # https://github.com/actions/cache
         uses: actions/cache@v4
         with:
+          ## Lesson 86 suggests caching node_modules instead of ~/.npm
+          ## Rewatch that and update as needed.
           path: ~/.npm
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
@@ -66,10 +65,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
 
       - name: Download Build Artifacts
         # https://github.com/actions/download-artifact
@@ -84,6 +83,8 @@ jobs:
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
+          ## Lesson 86 suggests caching node_modules instead of ~/.npm
+          ## Rewatch that and update as needed.
           path: ~/.npm
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
 
@@ -157,12 +158,12 @@ jobs:
         # In a production app, a more practical approach in the 'failure'
         # case would be to log the error details, notify the team, or trigger a rollback.
         run: echo "Failure!"
+# https://docs.github.com/en/actions/learn-github-actions/contexts
+# bonus:
+#   needs: deploy
+#   name: Bonus
+#   runs-on: ubuntu-latest
+#   steps:
 
-  # bonus:
-  #   needs: deploy
-  #   name: Bonus
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     # https://docs.github.com/en/actions/learn-github-actions/contexts
-  #     - name: Bonus - output context of github
-  #       run: echo "${{ toJSON(github) }}"
+#     - name: Bonus - output context of github
+#       run: echo "${{ toJSON(github) }}"

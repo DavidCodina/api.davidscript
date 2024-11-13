@@ -35,54 +35,15 @@ env:
   # MONGO_URI: mongodb://localhost:27017/demo
 
 jobs:
-  #--------------------------------------------------------------------------
-  #
-  # Because the lint job is set up to error out on warnings, it's likely that
-  # in many cases a Typescript error will also cause an error in the lint job.
-  # That said, this job is no longer necessary because the package.json build command
-  # already bakes in a typescript checks and returns early if there are errors.
-  #
-  #   "build": "npm run typescript && node esbuild.config.mjs",
-  #   "typescript": "tsc --noEmit",
-  #
-  # This build command is pretty strict. If there is a single typescript error, it will fail.
-  #
-  #--------------------------------------------------------------------------
-
-  # typescript:
-  #   name: TypeScript Check
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       node-version: [22.x]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-  #     - name: Cache Dependencies
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: ~/.npm
-  #         key: node_modules-${{ hashFiles('**/package-lock.json') }}
-  #     - name: Install Dependencies
-  #       run: npm ci
-  #     - name: Run tsc
-  #       run: npx tsc --noEmit
-
   build:
     name: Build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
       # Cache dependencies. Must be done in all jobs that install dependencies.
       # This seems to speed up the process by about 20s.
       # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139976#overview
@@ -90,11 +51,27 @@ jobs:
         # https://github.com/actions/cache
         uses: actions/cache@v4
         with:
+          ## Lesson 86 suggests caching node_modules instead of ~/.npm
+          ## Rewatch that and update as needed.
           path: ~/.npm
           key: node_modules-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
         run: npm ci
       - name: Build Project
+        #--------------------------------------------------------------------------
+        #
+        # The package.json build command bakes in a typescript check and returns early if there are errors.
+        # This build command is pretty strict. If there is a single typescript error, it will fail.
+        #
+        #   "build": "npm run typescript && node esbuild.config.mjs",
+        #   "typescript": "tsc --noEmit",
+        #
+        # Because the lint job is set up to error out on warnings, it's likely that
+        # in many cases a Typescript error will also cause an error in the lint job.
+        # That said, this job is no longer necessary because the package.json build command
+        # already bakes in a typescript checks and returns early if there are errors.
+        #
+        #--------------------------------------------------------------------------
         run: npm run build
         # https://www.udemy.com/course/github-actions-the-complete-guide/learn/lecture/34139932#overview
       - name: Upload Build Artifacts
@@ -115,17 +92,15 @@ jobs:
     # This is set up in GitHub branch --> Settings --> Branches.
     name: Lint
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
+
     steps:
       # https://github.com/marketplace/actions/checkout
       # https://github.com/actions/checkout
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:
@@ -142,15 +117,12 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22.x]
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22.x
       - name: Cache Dependencies
         uses: actions/cache@v4
         with:

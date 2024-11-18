@@ -1,14 +1,16 @@
 name: Deploy
 
 on:
-  push:
-    # The Deploy workflow push event should only be triggered through merging a pull request.
-    # Branch protection is set up on GitHub to prevent directly pushing to main or master.
-    # Additionally, branch proetection requires Build, Lint and Test status checks to pass before
-    # merging.
-    branches:
-      - main
-      - master
+  # The Deploy workflow push event should only be triggered through merging a pull request.
+  # Branch protection is set up on GitHub to prevent directly pushing to main or master.
+  # Additionally, branch proetection requires Build, Lint and Test status checks to pass before
+  # merging.
+  #^ Automatically deploying on PR merge may be something you want,
+  #^ but I prefer to always dispatch it manually.
+  # push:
+  #   branches:
+  #     - main
+  #     - master
 
   workflow_dispatch:
 
